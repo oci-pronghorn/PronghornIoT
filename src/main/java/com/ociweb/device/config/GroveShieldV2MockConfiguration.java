@@ -224,4 +224,10 @@ public class GroveShieldV2MockConfiguration extends GroveConnectionConfiguration
         return true;
     }
 
+	@Override
+	public void writeBit(int connector, int value) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

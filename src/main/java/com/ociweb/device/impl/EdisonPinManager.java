@@ -64,12 +64,16 @@ public class EdisonPinManager {
     public static final byte[] MODE_2         = "mode2".getBytes();
     public static final byte[] PULLUP         = "pullup".getBytes();
     
-    public static final ByteBuffer I2C_LOW;
-    public static final ByteBuffer I2C_HIGH;
+//    public static final ByteBuffer I2C_LOW;
+//    public static final ByteBuffer I2C_HIGH;
+    public static final ByteBuffer I2C_LOW = ByteBuffer.wrap(VALUE_LOW);
+    public static final ByteBuffer I2C_HIGH = ByteBuffer.wrap(VALUE_HIGH);
     public static final ByteBuffer I2C_OUT;
     public static final ByteBuffer I2C_IN;
     public static final ByteBuffer I2C_DIRECTION_LOW;
     public static final ByteBuffer I2C_DIRECTION_HIGH;
+    public static final ByteBuffer[] BIT_BYTES = new ByteBuffer[]{I2C_LOW, I2C_HIGH};
+ 
     
     public static final int I2C_CLOCK = 19;
     public static final int I2C_DATA = 18;
@@ -82,13 +86,13 @@ public class EdisonPinManager {
     
     static {
         
-        I2C_LOW = ByteBuffer.allocateDirect(VALUE_LOW.length);
-        I2C_LOW.put(VALUE_LOW);
-        I2C_LOW.clear();
-        
-        I2C_HIGH = ByteBuffer.allocateDirect(VALUE_HIGH.length);
-        I2C_HIGH.put(VALUE_HIGH);
-        I2C_HIGH.clear();
+//        I2C_LOW = ByteBuffer.allocateDirect(VALUE_LOW.length);
+//        I2C_LOW.put(VALUE_LOW);
+//        I2C_LOW.clear();
+//        
+//        I2C_HIGH = ByteBuffer.allocateDirect(VALUE_HIGH.length);
+//        I2C_HIGH.put(VALUE_HIGH);
+//        I2C_HIGH.clear();
         
         I2C_OUT = ByteBuffer.allocateDirect(OUT.length);
         I2C_OUT.put(OUT);
@@ -266,6 +270,9 @@ public class EdisonPinManager {
             }
     }
     
+
+    
+    
     public static void writeDirection(int port, ByteBuffer data, EdisonPinManager d) {
         try {
             SeekableByteChannel channel = d.gpioDirectionChannel[port];
@@ -396,5 +403,10 @@ public class EdisonPinManager {
             
 
     }
+
+	public static void writeBit(int connector, int value, EdisonPinManager gpiolinuxpins) {
+		writeValue(connector, BIT_BYTES[value],gpiolinuxpins);
+		
+	}
 
 }

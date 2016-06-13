@@ -2,6 +2,7 @@ package com.ociweb.device.grove;
 
 import com.ociweb.device.config.GroveConnectionConfiguration;
 import com.ociweb.device.grove.schema.GroveRequestSchema;
+import com.ociweb.device.impl.EdisonPinManager;
 import com.ociweb.pronghorn.pipe.Pipe;
 import com.ociweb.pronghorn.stage.PronghornStage;
 import com.ociweb.pronghorn.stage.scheduling.GraphManager;
@@ -62,11 +63,12 @@ public class GroveShieldV2RequestStage extends PronghornStage {
                 case GroveRequestSchema.MSG_DIGITALSET_110:
                 {
                     int connector = Pipe.takeValue(requestPipe);
-                    int duration = Pipe.takeValue(requestPipe);     
-                    
-                    //TODO write something to device
+                    int value = Pipe.takeValue(requestPipe);     
                     
                     
+                    config.writeBit(connector,value);
+                    
+       
                 }   
                 break;
                 case GroveRequestSchema.MSG_DIGITALSET_120:

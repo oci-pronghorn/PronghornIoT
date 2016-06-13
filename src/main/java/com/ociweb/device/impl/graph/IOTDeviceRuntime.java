@@ -43,15 +43,17 @@ public class IOTDeviceRuntime {
 
     
     protected static GroveConnectionConfiguration getHarwareConfig() {
-        if (null==config) {
-            
-            //TODO: use the name of the JVM in the system properties to determine which one we are on
-            System.out.println("PLEASE REVIEW AND FIND A WAY TO CHOOSE:\n");
-            System.out.println(   System.getProperties() );
-            
-            boolean isEdison = true;
-            boolean isPi     = false;
-            
+        if (null==config) {                                                                                                     
+            System.out.println(System.getProperty("os.version"));
+            String osversion  =System.getProperty("os.version");
+            String version = "edison";
+            boolean isEdison = false;
+            boolean isPi     = true;
+            if ( osversion.toLowerCase().indexOf(version.toLowerCase()) != -1 ) {
+             isEdison = true;
+             isPi     = false;
+            }
+            System.out.println("This Version is Edision: True or Flase: " +isEdison);
             if (isEdison) {
                 config = new GroveShieldV2EdisonConfiguration();
             }
