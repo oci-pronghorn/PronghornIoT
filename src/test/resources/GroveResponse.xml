@@ -5,45 +5,18 @@
      <uInt64 name="Value" id="11"/>
    </template>  
     
-   <template name="UV" id="20">
-     <uInt32 name="Connector" id="21">
-     	<copy/>
-     </uInt32>
+   <template name="DigitalSample" id="20">
+     <uInt32 name="Connector" id="21"/>
      <uInt32 name="Value" id="22"/>
-     <uInt32 name="Average" id="23"/>
    </template>
-
-   <template name="Light" id="30">
-     <uInt32 name="Connector" id="31">
-     	<copy/>
-     </uInt32>
+       
+   <template name="AnalogSample" id="30">
+     <uInt32 name="Connector" id="31"/>
      <uInt32 name="Value" id="32"/>
      <uInt32 name="Average" id="33"/>
    </template>
-
-   <template name="Moisture" id="40">
-     <uInt32 name="Connector" id="41">
-     	<copy/>
-     </uInt32>
-     <uInt32 name="Value" id="42"/>
-     <uInt32 name="Average" id="43"/>
-   </template>
-
-   <template name="Button" id="50" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
-     <uInt32 name="Connector" id="51">
-     	<copy/>
-     </uInt32>
-     <uInt32 name="Value" id="52"/>
-   </template>
-
-   <template name="Motion" id="60" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
-     <uInt32 name="Connector" id="61">
-     	<copy/>
-     </uInt32> 
-     <uInt32 name="Value" id="62"/>
-   </template>
-
-   <template name="Rotary" id="70" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+   
+   <template name="Encoder" id="70">
      <uInt32 name="Connector" id="71">
      	<copy/>
      </uInt32>

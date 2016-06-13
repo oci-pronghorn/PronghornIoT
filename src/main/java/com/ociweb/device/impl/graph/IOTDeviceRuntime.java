@@ -79,13 +79,20 @@ public class IOTDeviceRuntime {
         
     }
     
+
+    
+    public void addRESTSignature(int i, String string) {
+
+        // TODO accumulate all thse rest processor, when start is called then configure the server to take them all. 
+        
+    }
     
     protected void registerListener(AnalogListener listener) {
        
         Pipe<GroveResponseSchema> pipe = new Pipe<GroveResponseSchema>(responsePipeConfig.grow2x());
         collectedResponsePipes.add(pipe);
         
-        ReactiveListenerStage stage = new ReactiveListenerStage(gm, listener, new Pipe[]{pipe});
+        ReactiveListenerStage stage = new ReactiveListenerStage(gm, listener, pipe);
 
     }
     
@@ -94,8 +101,22 @@ public class IOTDeviceRuntime {
         Pipe<GroveResponseSchema> pipe = new Pipe<GroveResponseSchema>(responsePipeConfig.grow2x());
         collectedResponsePipes.add(pipe);
         
-        ReactiveListenerStage stage = new ReactiveListenerStage(gm, listener, new Pipe[]{pipe});
-
+        if (listener instanceof RestListener) {
+            
+            Pipe restPipe = null; //this holds rest requests detected from the webserver, these can come directly from router.
+            
+            //create new pipe
+            
+            //add pipe to collection for starting the server ??
+            
+            
+            ReactiveListenerStage stage = new ReactiveListenerStage(gm, listener, pipe, restPipe);
+            
+        } else {
+        
+        
+            ReactiveListenerStage stage = new ReactiveListenerStage(gm, listener, pipe);
+        }
     }
 
     protected void start() {
@@ -128,6 +149,11 @@ public class IOTDeviceRuntime {
         new GroveShieldV2ResponseStage(gm,responsePipe,config);
         
     }
+
+
+
+
+
     
     
 }

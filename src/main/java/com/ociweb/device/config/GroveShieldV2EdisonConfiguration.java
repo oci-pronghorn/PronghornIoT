@@ -98,6 +98,11 @@ public class GroveShieldV2EdisonConfiguration extends GroveConnectionConfigurati
         return EdisonPinManager.readInt(connector);
     }
     
+	public void writeBit(int connector, int value) {
+	EdisonPinManager.writeBit(connector, value, EdisonGPIO.gpioLinuxPins);
+		//TODO: this need to be completed
+	}
+	
     public void i2cSetClockLow() {
         EdisonPinManager.writeValue(EdisonPinManager.I2C_CLOCK, EdisonPinManager.I2C_LOW, EdisonGPIO.gpioLinuxPins);
     }
@@ -176,4 +181,6 @@ public class GroveShieldV2EdisonConfiguration extends GroveConnectionConfigurati
     
         return result;
     }
+
+
 }

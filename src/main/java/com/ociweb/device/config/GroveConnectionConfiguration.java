@@ -1,5 +1,6 @@
 package com.ociweb.device.config;
 
+import java.nio.IntBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -148,7 +149,9 @@ public abstract class GroveConnectionConfiguration {
     
     public abstract int readBit(int connector); //Platform specific
     public abstract int readInt(int connector); //Platform specific
-
+    
+    
+    public abstract void writeBit(int connector, int value);             //Platform specific
     public abstract void configurePinsForDigitalInput(byte connection); //Platform specific
     public abstract void configurePinsForAnalogInput(byte connection); //Platform specific
     public abstract void configurePinsForI2C();
@@ -195,8 +198,7 @@ public abstract class GroveConnectionConfiguration {
         }
     }
 
-
-
+	
 
 
 

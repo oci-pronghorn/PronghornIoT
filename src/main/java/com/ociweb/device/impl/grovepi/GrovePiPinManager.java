@@ -40,6 +40,7 @@ public class GrovePiPinManager {
 
     public static final ByteBuffer I2C_LOW = ByteBuffer.wrap(VALUE_LOW);
     public static final ByteBuffer I2C_HIGH = ByteBuffer.wrap(VALUE_HIGH);
+    public static final ByteBuffer[] BIT_BYTES = new ByteBuffer[]{I2C_LOW, I2C_HIGH};
     public static final int I2C_CLOCK = 1;
     public static final int I2C_DATA = 0;
 
@@ -208,4 +209,9 @@ public class GrovePiPinManager {
             throw new RuntimeException(e);
         }
     }
+
+	public static void writeBit(int connector, int value, final GrovePiPinManager d) {
+		writeValue(connector, BIT_BYTES[value],d);
+		
+	}
 }

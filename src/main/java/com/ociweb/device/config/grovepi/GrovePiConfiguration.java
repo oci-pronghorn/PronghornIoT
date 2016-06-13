@@ -82,10 +82,14 @@ public class GrovePiConfiguration extends GroveConnectionConfiguration {
     public int readBit(int connector) {   
         return GrovePiPinManager.readBit(connector);
     }
-
+    
     //TODO: Since there's no ADC built into the Pi, we can only read HI or LO.
     public int readInt(int connector) {
         return GrovePiPinManager.readBit(connector);
+    }
+    
+    public void writeBit(int connector, int value) {   
+         GrovePiPinManager.writeBit(connector,value,GrovePiGPIO.gpioLinuxPins);
     }
     
     //TODO: Is it right to config them as outputs before writing?

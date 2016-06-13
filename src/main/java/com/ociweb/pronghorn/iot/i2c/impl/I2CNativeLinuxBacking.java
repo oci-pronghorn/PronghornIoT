@@ -22,20 +22,23 @@ public class I2CNativeLinuxBacking implements I2CBacking {
     //Native I2C file handle.
     private int i2cFile = -1;
 
+    //Most recent address we've handled in order to restrict duplicat IOCTL calls.
+    private byte lastAddress = (byte) -127;
+
     /**
      * Configures I2C to communicate with the specified byte address.
      *
      * @param address Byte address of the I2C device to configure for.
      */
     private boolean ensureI2CDevice(byte address) {
-        if (address > 0 && address <= I2C_MAX_ADDRESSES) {
-
+        if (address > 0 && address <= I2C_MAX_ADDRESSES && lastAddress != address) {
             /**
              * IOCTL will return -1 if it fails for any reason.
              */
             if (c.ioctl(i2cFile, UnixIoctlLib.I2C_SLAVE_FORCE, address) < 0) {
                 throw new RuntimeException("Could not configure IOCTL for I2C device at 0x" + Integer.toHexString(address));
             } else {
+                lastAddress = address;
                 logger.debug("IOCTL configured for I2C device at 0x" + Integer.toHexString(address));
                 return true;
             }
@@ -67,10 +70,9 @@ public class I2CNativeLinuxBacking implements I2CBacking {
         });
     }
 
-    @Override public byte[] read(int bufferSize, byte address, byte... message) {
+    @Override public byte[] read(byte address, int bufferSize) {
         //Check if we need to load the address into memory.
         if (ensureI2CDevice(address)) {
-            write(address, message);
             byte[] receiving = new byte[bufferSize];
             c.read(i2cFile, receiving, receiving.length);
             return receiving;
