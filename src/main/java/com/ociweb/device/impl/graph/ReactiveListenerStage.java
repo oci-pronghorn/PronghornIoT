@@ -9,43 +9,58 @@ import com.ociweb.pronghorn.stage.scheduling.GraphManager;
 public class ReactiveListenerStage extends PronghornStage {
 
     private final Object listener;
-    private Pipe<GroveResponseSchema>[] groveResponsePipes;
+    private Pipe<GroveResponseSchema> groveResponsePipe;
+    private Pipe<?>                   restResponsePipes;
     
-    protected ReactiveListenerStage(GraphManager graphManager, Object listener, Pipe<GroveResponseSchema>[] groveResponsePipes) {
-        super(graphManager, join(groveResponsePipes /*Add other pipes here from other sources*/), NONE);
+    
+    protected ReactiveListenerStage(GraphManager graphManager, Object listener, Pipe<GroveResponseSchema> groveResponsePipes) {
+        super(graphManager, groveResponsePipes, NONE);
         this.listener = listener;
-        this.groveResponsePipes = groveResponsePipes;    
+        this.groveResponsePipe = groveResponsePipes;    
+    }
+    
+    protected ReactiveListenerStage(GraphManager graphManager, Object listener, Pipe<GroveResponseSchema> groveResponsePipes, Pipe restResponsePipes) {
+        super(graphManager, new Pipe[]{groveResponsePipes, restResponsePipes}, NONE);
+        this.listener = listener;
+        this.groveResponsePipe = groveResponsePipes;    
+        assert(null!=restResponsePipes);
+        this.restResponsePipes = restResponsePipes;
+        assert(listener instanceof RestListener);
+        
     }
 
     @Override
     public void run() {
         
-        processGroveResponse(listener, groveResponsePipes);
+        //TODO: replace with linked list of processors?, NOTE each one also needs a length bound so it does not starve the rest.
+        consumeResponseMessage(listener, groveResponsePipe);
+        consumeRestMessage(listener, restResponsePipes);
+        
         
         //if additional array sources are added then processors will go here for those pipe arrays
          
         
     }
-    
-    //TODO: finish this class:
-    //TODO: build graph builder based on  lambdas and requested sources
-    //TODO: build assert atomic checked reader.
 
-
-
-
-    private void processGroveResponse(Object listener, Pipe<GroveResponseSchema>[] inputsA) {
-        
-        int j = inputsA.length;
-        while (--j >= 0) {
-            consumeResponseMessage(listener, inputsA[j]);
+    private void consumeRestMessage(Object listener2, Pipe<?> p) {
+        if (null!= p) {
+            
+            while (PipeReader.tryReadFragment(p)) {                
+                
+                int msgIdx = PipeReader.getMsgIdx(p);
+                
+                //no need to check instance of since this was registered and we have a pipe
+                ((RestListener)listener).restRequest(1, null, null);
+                
+                //done reading message off pipe
+                PipeReader.releaseReadLock(p);
+            }
             
         }
-        
     }
 
     private void consumeResponseMessage(Object listener, Pipe<GroveResponseSchema> p) {
-        if (PipeReader.tryReadFragment(p)) {                
+        while (PipeReader.tryReadFragment(p)) {                
             
             int msgIdx = PipeReader.getMsgIdx(p);
             switch (msgIdx) {   //Just 4 methods??  TODO: must remove specifc field times and use the general types here as well.
@@ -59,61 +74,32 @@ public class ReactiveListenerStage extends PronghornStage {
                     
                     }   
                 break;
-                case GroveResponseSchema.MSG_UV_20:
+                case GroveResponseSchema.MSG_ANALOGSAMPLE_30:
                     if (listener instanceof AnalogListener) {
                         
-                        int average = PipeReader.readInt(p, GroveResponseSchema.MSG_UV_20_FIELD_AVERAGE_23);
-                        int connector = PipeReader.readInt(p, GroveResponseSchema.MSG_UV_20_FIELD_CONNECTOR_21);
-                        int value = PipeReader.readInt(p, GroveResponseSchema.MSG_UV_20_FIELD_VALUE_22);
+                        int average = PipeReader.readInt(p, GroveResponseSchema.MSG_ANALOGSAMPLE_30_FIELD_AVERAGE_33);
+                        int connector = PipeReader.readInt(p, GroveResponseSchema.MSG_ANALOGSAMPLE_30_FIELD_CONNECTOR_31);
+                        int value = PipeReader.readInt(p, GroveResponseSchema.MSG_ANALOGSAMPLE_30_FIELD_VALUE_32);
                         
-                        ((AnalogListener)listener).analogEvent(msgIdx, connector, average, value);
-                        
-                    }   
-                break;
-                case GroveResponseSchema.MSG_LIGHT_30:
-                    if (listener instanceof AnalogListener) {   
-                        
-                        int average = PipeReader.readInt(p, GroveResponseSchema.MSG_LIGHT_30_FIELD_AVERAGE_33);
-                        int connector = PipeReader.readInt(p, GroveResponseSchema.MSG_LIGHT_30_FIELD_CONNECTOR_31);
-                        int value = PipeReader.readInt(p, GroveResponseSchema.MSG_LIGHT_30_FIELD_VALUE_32);
-                                                
-                        ((AnalogListener)listener).analogEvent(msgIdx, connector, average, value);
+                        ((AnalogListener)listener).analogEvent(connector, average, value);
                         
                     }   
-                break;
-                case GroveResponseSchema.MSG_MOISTURE_40:
-                    if (listener instanceof AnalogListener) {
-                        int average = PipeReader.readInt(p, GroveResponseSchema.MSG_MOISTURE_40_FIELD_AVERAGE_43);
-                        int connector = PipeReader.readInt(p, GroveResponseSchema.MSG_MOISTURE_40_FIELD_CONNECTOR_41);
-                        int value = PipeReader.readInt(p, GroveResponseSchema.MSG_MOISTURE_40_FIELD_VALUE_42);
-                     
-                        ((AnalogListener)listener).analogEvent(msgIdx, connector, average, value);
-                                                
-                    }   
-                break;
-                case GroveResponseSchema.MSG_BUTTON_50:
+                break;               
+                case GroveResponseSchema.MSG_DIGITALSAMPLE_20:
                     if (listener instanceof DigitalListener) {
-                        int connector = PipeReader.readInt(p, GroveResponseSchema.MSG_BUTTON_50_FIELD_CONNECTOR_51);
-                        int value = PipeReader.readInt(p, GroveResponseSchema.MSG_BUTTON_50_FIELD_VALUE_52);
+                        int connector = PipeReader.readInt(p, GroveResponseSchema.MSG_DIGITALSAMPLE_20_FIELD_CONNECTOR_21);
+                        int value = PipeReader.readInt(p, GroveResponseSchema.MSG_DIGITALSAMPLE_20_FIELD_VALUE_22);
                             
-                        ((DigitalListener)listener).digitalEvent(msgIdx, connector, value);
+                        ((DigitalListener)listener).digitalEvent(connector, value);
                         
                     }   
-                break;
-                case GroveResponseSchema.MSG_MOTION_60:
-                    if (listener instanceof DigitalListener) {   
-                        int connector = PipeReader.readInt(p, GroveResponseSchema.MSG_MOTION_60_FIELD_CONNECTOR_61);
-                        int value = PipeReader.readInt(p, GroveResponseSchema.MSG_MOTION_60_FIELD_VALUE_62);
-                     
-                        ((DigitalListener)listener).digitalEvent(msgIdx, connector, value);
-                    }   
-                break;
-                case GroveResponseSchema.MSG_ROTARY_70:
+                break; 
+                case GroveResponseSchema.MSG_ENCODER_70:
                     if (listener instanceof RotaryListener) {    
-                        int connector = PipeReader.readInt(p, GroveResponseSchema.MSG_ROTARY_70_FIELD_CONNECTOR_71);
-                        int value = PipeReader.readInt(p, GroveResponseSchema.MSG_ROTARY_70_FIELD_VALUE_72);
-                        int delta = PipeReader.readInt(p, GroveResponseSchema.MSG_ROTARY_70_FIELD_DELTA_73);
-                        int speed = PipeReader.readInt(p, GroveResponseSchema.MSG_ROTARY_70_FIELD_SPEED_74);
+                        int connector = PipeReader.readInt(p, GroveResponseSchema.MSG_ENCODER_70_FIELD_CONNECTOR_71);
+                        int value = PipeReader.readInt(p, GroveResponseSchema.MSG_ENCODER_70_FIELD_VALUE_72);
+                        int delta = PipeReader.readInt(p, GroveResponseSchema.MSG_ENCODER_70_FIELD_DELTA_73);
+                        int speed = PipeReader.readInt(p, GroveResponseSchema.MSG_ENCODER_70_FIELD_SPEED_74);
                         
                         ((RotaryListener)listener).rotaryEvent(connector, value, delta, speed);
                                             

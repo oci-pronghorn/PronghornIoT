@@ -15,8 +15,9 @@ public class EdisonGPIO {
     public static void ensureAllLinuxDevices(GroveConnect[] usedLines) {
         
         shieldControl.ensureDevice(0); //tri statebyte
+        //create the edision later write mode 
         shieldControl.ensureDevice(1); //shield reset
-    
+    // shell r
         int j = usedLines.length;
         while (--j>=0) {                
             int i = usedLines[j].connection;

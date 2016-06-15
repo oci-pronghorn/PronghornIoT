@@ -16,6 +16,15 @@
      <uInt32 name="Duration" id="113"/>
   </template>  
    
+  <template name="Block" id="220"> 
+     <uInt32 name="Connector" id="111">
+     	<copy/>
+     </uInt32>
+     <uInt32 name="Duration" id="113"/>
+  </template>   
+   
+   <!--  TODO: add send 'event' with byte payload.  this is to be sent on pipe to response back for ack that requests have been completed. -->
+   
   <template name="AnalogSet" id="140"> 
      <uInt32 name="Connector" id="141">
      	<copy/>

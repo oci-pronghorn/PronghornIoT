@@ -31,7 +31,12 @@ public class GrovePiConfiguration extends GroveConnectionConfiguration {
     public void configurePinsForDigitalInput(byte connection) {
         GrovePiGPIO.configDigitalInput(connection); //readBit
     }
-
+    
+	public void configurePinsForDigitalOutput(byte connection) {
+		GrovePiGPIO.configDigitalOutput(connection);//writeBit
+		
+	}
+    
     public void configurePinsForAnalogInput(byte connection) {
         System.err.println("Analog pins are not supported.");
     }
@@ -82,10 +87,14 @@ public class GrovePiConfiguration extends GroveConnectionConfiguration {
     public int readBit(int connector) {   
         return GrovePiPinManager.readBit(connector);
     }
-
+    
     //TODO: Since there's no ADC built into the Pi, we can only read HI or LO.
     public int readInt(int connector) {
         return GrovePiPinManager.readBit(connector);
+    }
+    
+    public void writeBit(int connector, int value) {   
+         GrovePiPinManager.writeBit(connector,value,GrovePiGPIO.gpioLinuxPins);
     }
     
     //TODO: Is it right to config them as outputs before writing?
@@ -168,4 +177,5 @@ public class GrovePiConfiguration extends GroveConnectionConfiguration {
     
         return result;
     }
+
 }

@@ -112,7 +112,7 @@ public class I2CGroveJavaBacking implements I2CBacking {
         this.config = config;
     }
 
-    @Override public byte[] read(int bufferSize, byte address, byte... message) {
+    @Override public byte[] read(byte address, int bufferSize) {
         //TODO: Unimplemented.
         throw new RuntimeException("Bit-banged reads aren't supported yet.");
     }

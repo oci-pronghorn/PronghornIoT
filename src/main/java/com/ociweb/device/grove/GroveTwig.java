@@ -8,7 +8,7 @@ public enum GroveTwig implements Twig {
     UVSensor(){
         @Override
         public void writeInt(Pipe<GroveResponseSchema> responsePipe, int connector, int intValue, int average) {
-            int size = Pipe.addMsgIdx(responsePipe, GroveResponseSchema.MSG_UV_20);
+            int size = Pipe.addMsgIdx(responsePipe, GroveResponseSchema.MSG_ANALOGSAMPLE_30);
             Pipe.addIntValue(connector, responsePipe);
             Pipe.addIntValue(intValue, responsePipe);
             Pipe.addIntValue(average, responsePipe);
@@ -24,7 +24,7 @@ public enum GroveTwig implements Twig {
     LightSensor(){
         @Override
         public void writeInt(Pipe<GroveResponseSchema> responsePipe, int connector, int intValue, int average) {
-            int size = Pipe.addMsgIdx(responsePipe, GroveResponseSchema.MSG_LIGHT_30);
+            int size = Pipe.addMsgIdx(responsePipe, GroveResponseSchema.MSG_ANALOGSAMPLE_30);
             Pipe.addIntValue(connector, responsePipe);
             Pipe.addIntValue(intValue, responsePipe);
             Pipe.addIntValue(average, responsePipe);
@@ -40,7 +40,7 @@ public enum GroveTwig implements Twig {
     MoistureSensor(){
         @Override
         public void writeInt(Pipe<GroveResponseSchema> responsePipe, int connector, int intValue, int average) {
-            int size = Pipe.addMsgIdx(responsePipe, GroveResponseSchema.MSG_MOISTURE_40);
+            int size = Pipe.addMsgIdx(responsePipe, GroveResponseSchema.MSG_ANALOGSAMPLE_30);
             Pipe.addIntValue(connector, responsePipe);
             Pipe.addIntValue(intValue, responsePipe);
             Pipe.addIntValue(average, responsePipe);
@@ -56,7 +56,7 @@ public enum GroveTwig implements Twig {
     Button() {
         @Override
         public void writeBit(Pipe<GroveResponseSchema> responsePipe, int connector, int bitValue) {
-            int size = Pipe.addMsgIdx(responsePipe, GroveResponseSchema.MSG_BUTTON_50);
+            int size = Pipe.addMsgIdx(responsePipe, GroveResponseSchema.MSG_DIGITALSAMPLE_20);
             Pipe.addIntValue(connector, responsePipe);
             Pipe.addIntValue(bitValue, responsePipe);
             Pipe.publishWrites(responsePipe);
@@ -72,7 +72,7 @@ public enum GroveTwig implements Twig {
     MotionSensor(){
         @Override
         public void writeBit(Pipe<GroveResponseSchema> responsePipe, int connector, int bitValue) {
-            int size = Pipe.addMsgIdx(responsePipe,GroveResponseSchema.MSG_MOTION_60);
+            int size = Pipe.addMsgIdx(responsePipe,GroveResponseSchema.MSG_DIGITALSAMPLE_20);
             Pipe.addIntValue(connector, responsePipe);
             Pipe.addIntValue(bitValue, responsePipe);
             Pipe.publishWrites(responsePipe);
@@ -87,7 +87,7 @@ public enum GroveTwig implements Twig {
     RotaryEncoder() {
         @Override
         public void writeRotation(Pipe<GroveResponseSchema> responsePipe, int connector, int value, int delta, int speed) {            
-            int size = Pipe.addMsgIdx(responsePipe, GroveResponseSchema.MSG_ROTARY_70);
+            int size = Pipe.addMsgIdx(responsePipe, GroveResponseSchema.MSG_ENCODER_70);
             Pipe.addIntValue(connector, responsePipe);
             Pipe.addIntValue(value, responsePipe);
             Pipe.addIntValue(delta, responsePipe);            

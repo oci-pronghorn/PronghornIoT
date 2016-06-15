@@ -193,6 +193,13 @@ public class GroveShieldV2MockConfiguration extends GroveConnectionConfiguration
         // TODO Auto-generated method stub
 
     }
+    
+    @Override
+	public void configurePinsForDigitalOutput(byte connection) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
     @Override
     public void configurePinsForAnalogInput(byte connection) {
@@ -223,5 +230,12 @@ public class GroveShieldV2MockConfiguration extends GroveConnectionConfiguration
     public boolean i2cReadAck() {
         return true;
     }
+
+	@Override
+	public void writeBit(int connector, int value) {
+		//TODO:System.out.println();
+		//TODO:Log show the log to show the mock process 
+		
+	}
 
 }
