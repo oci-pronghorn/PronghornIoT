@@ -14,18 +14,62 @@ import com.ociweb.iot.hardware.IODevice;
  */
 public interface Hardware {
 
-    Hardware connect(IODevice t, Port port);
-    Hardware connect(IODevice t, Port port, int customRateMS);
-    Hardware connect(IODevice t, Port port, int customRateMS, int customAvgWinMS);
-    Hardware connect(IODevice t, Port port, int customRateMS, int customAvgWinMS, boolean everyValue);
+    /**
+     * Connects a new {@link IODevice} to this hardware on a given {@link Port}.
+     *
+     * @param device {@link IODevice} to connect.
+     * @param port {@link Port} to connect the device to.
+     * @param customRateMS Optional rate in milliseconds to update the device data. TODO: Correct?
+     * @param customAvgWinMS Optional rate in milliseconds to sample device data. TODO: Correct?
+     * @param everyValue Optional; if set to true, will cause the device to trigger events on every update. TODO: Correct?
+     *
+     * @return A reference to this hardware instance.
+     */
+    Hardware connect(IODevice device, Port port, int customRateMS, int customAvgWinMS, boolean everyValue);
+    Hardware connect(IODevice device, Port port, int customRateMS, int customAvgWinMS);
+    Hardware connect(IODevice device, Port port, int customRateMS);
+    Hardware connect(IODevice device, Port port);
 
-    Hardware connectI2C(IODevice t);
+    /**
+     * Connects a new I2C {@link IODevice} to this hardware.
+     *
+     * @param device {@link IODevice} to connect.
+     *
+     * @return A reference to this hardware instance.
+     */
+    Hardware connectI2C(IODevice device);
 
+    /**
+     * Initializes the hardware state machine with the given {@link Enum} state.
+     *
+     * @param state Initial state to use.
+     *
+     * @return A reference to this hardware instance.
+     */
     <E extends Enum<E>> Hardware startStateMachineWith(E state);
 
+    /**
+     * Sets the trigger rate of events on this hardware.
+     *
+     * @param rateInMS Rate in milliseconds to trigger events.
+     *
+     * @return A reference to this hardware instance.
+     */
     Hardware setTriggerRate(long rateInMS);
+
+    /**
+     * Sets the trigger rate of events on this hardware.
+     *
+     * @param trigger {@link TimeTrigger} to use for controlling trigger rate.
+     *
+     * @return A reference to this hardware instance.
+     */
     Hardware setTriggerRate(TimeTrigger trigger);
 
-
+    /**
+     * Asks this hardware instance to enable I2C communications.
+     *
+     * @return A reference to this hardware instance.
+     */
     Hardware useI2C();
 }
