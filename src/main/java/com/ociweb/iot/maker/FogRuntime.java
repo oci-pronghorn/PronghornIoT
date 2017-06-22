@@ -1,5 +1,8 @@
 package com.ociweb.iot.maker;
 
+import com.ociweb.gl.api.TimeListener;
+import com.ociweb.gl.impl.stage.ReactiveListenerStage;
+import com.ociweb.pronghorn.stage.scheduling.NonThreadScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +49,7 @@ public class FogRuntime extends MsgRuntime<HardwareImpl, ListenerFilterIoT>  {
     public static final String PROVIDED_HARDWARE_IMPL_NAME = "com.ociweb.iot.hardware.impl.ProvidedHardwareImpl";
 
     public final String[] args;
-    
+
     public FogRuntime() {
        this(null);
     }
@@ -204,7 +207,28 @@ public class FogRuntime extends MsgRuntime<HardwareImpl, ListenerFilterIoT>  {
     public ListenerFilterIoT registerListener(Object listener) {
     	return registerListenerImpl(listener);
     }
-    
+
+    public ListenerFilterIoT registerListener(Object listener, long triggerRate) {
+    	return registerListenerImpl(listener, triggerRate);
+	}
+
+	public ListenerFilterIoT addImageListener(ImageListener listener, long triggerRate) {
+		//NOTE: this is an odd approach, this level of configuration is normally hidden on this layer.
+		//      TODO: images should have their own internal time and not hijack the application level timer.
+		if (triggerRate < 1250) {
+			throw new RuntimeException("Image listeners cannot be used with custom trigger rates of less than 1250 MS.");
+		}
+
+		switch (builder.getPlatformType()) {
+			case GROVE_PI:
+				return registerListener(new PiImageListenerBacking(listener), triggerRate);
+			default:
+				throw new UnsupportedOperationException("Image listeners are not supported for [" +
+																builder.getPlatformType() +
+																"] hardware");
+		}
+	}
+
     public ListenerFilterIoT addImageListener(ImageListener listener) {
     	//NOTE: this is an odd approach, this level of configuration is normally hidden on this layer.
     	//      TODO: images should have their own internal time and not hijack the application level timer.
@@ -226,7 +250,21 @@ public class FogRuntime extends MsgRuntime<HardwareImpl, ListenerFilterIoT>  {
         return registerListenerImpl(listener);
     }
 
-    private ListenerFilterIoT registerListenerImpl(Object listener, int ... optionalInts) {
+    private void configureStageRate(Object listener, ReactiveListenerStage stage, long triggerRate) {
+        if (triggerRate > 0 && listener instanceof TimeListener) {
+            stage.setTimeEventSchedule(triggerRate, System.currentTimeMillis());
+            //Since we are using the time schedule we must set the stage to be faster
+            long customRate =   (triggerRate * nsPerMS) / NonThreadScheduler.granularityMultiplier;// in ns and guanularityXfaster than clock trigger
+            long appliedRate = Math.min(customRate,builder.getDefaultSleepRateNS());
+            GraphManager.addNota(gm, GraphManager.SCHEDULE_RATE, appliedRate, stage);
+        }
+    }
+
+    private ListenerFilterIoT registerListenerImpl(Object listener, int... optionalInts) {
+        return registerListenerImpl(listener, -1, optionalInts);
+    }
+
+    private ListenerFilterIoT registerListenerImpl(Object listener, long triggerRate, int ... optionalInts) {
 
     	extractPipeData(listener, optionalInts);
 
@@ -269,7 +307,12 @@ public class FogRuntime extends MsgRuntime<HardwareImpl, ListenerFilterIoT>  {
         /////////////////////
 
         ReactiveListenerStageIOT reactiveListener = builder.createReactiveListener(gm, listener, inputPipes, outputPipes);
-		configureStageRate(listener,reactiveListener);
+
+        if (triggerRate > 0) {
+            configureStageRate(listener, reactiveListener, triggerRate);
+        } else {
+            configureStageRate(listener, reactiveListener);
+        }
 
 		int testId = -1;
 		int i = inputPipes.length;

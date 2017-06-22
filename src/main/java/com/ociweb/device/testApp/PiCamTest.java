@@ -39,7 +39,7 @@ public class PiCamTest implements FogApp {
                 images.remove(0);
                 f.delete();
             }
-        });
+        }, 3000);
     }
 
 
