@@ -23,18 +23,18 @@ public class PiCamTest implements FogApp {
     }
 
     @Override
-    public void declareConnections(Hardware hardware) {
-        hardware.setTimerPulseRate(1250);
-    }
+    public void declareConnections(Hardware hardware) { }
 
     @Override
     public void declareBehavior(FogRuntime runtime) {
+        runtime.setImageTriggerRate(2500);
         runtime.addImageListener(new ImageListener() {
             @Override
-            public void onImage(File image) {
-                System.out.println("Grove Pi Captured Image: ");
-                System.out.println(image);
+            public void onImage(String imagePath) {
+                System.out.print("Grove Pi Captured Image: ");
+                System.out.println(imagePath);
 
+                File image = new File(imagePath);
                 images.add(image);
 
                 if (images.size() > 50) {
@@ -45,6 +45,4 @@ public class PiCamTest implements FogApp {
             }
         });
     }
-
-
 }

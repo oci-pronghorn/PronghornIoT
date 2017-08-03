@@ -6,7 +6,8 @@ import java.io.File;
  * Listener for responding to image-receive events on a hardware system
  * equipped with a camera or other image-generating systems.
  *
- * @author Brandon Sanders [brandon@alicorn.io], moved and modifed by Ray Lo
+ * @author Brandon Sanders [brandon@alicorn.io] -- Initial API and implementation
+ * @author Ray Lo -- Moved and modified
  */
 @FunctionalInterface
 public interface ImageListenerBase {
@@ -20,7 +21,7 @@ public interface ImageListenerBase {
      * are being created, it's the responsibility of this listener
      * to delete the image files as needed.
      *
-     * @param image File reference to the received image.
+     * @param imagePath Complete path to the captured image file.
      */
-    void onImage(File image);
+    void onImage(String imagePath);
 }

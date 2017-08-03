@@ -1,7 +1,13 @@
 package com.ociweb.pronghorn.iot;
 
+import java.awt.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
+import com.ociweb.iot.impl.*;
+import com.ociweb.pronghorn.iot.schema.ImageSchema;
+import com.ociweb.pronghorn.pipe.DataInputBlobReader;
+import com.ociweb.pronghorn.pipe.RawDataSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,11 +18,6 @@ import com.ociweb.gl.impl.stage.ReactiveOperator;
 import com.ociweb.iot.hardware.HardwareConnection;
 import com.ociweb.iot.hardware.HardwareImpl;
 import com.ociweb.iot.hardware.impl.SerialInputSchema;
-import com.ociweb.iot.impl.AnalogListenerBase;
-import com.ociweb.iot.impl.DigitalListenerBase;
-import com.ociweb.iot.impl.I2CListenerBase;
-import com.ociweb.iot.impl.RotaryListenerBase;
-import com.ociweb.iot.impl.SerialListenerBase;
 import com.ociweb.iot.maker.AnalogListener;
 import com.ociweb.iot.maker.DigitalListener;
 import com.ociweb.iot.maker.I2CListener;
@@ -73,7 +74,7 @@ public class ReactiveListenerStageIOT extends ReactiveListenerStage<HardwareImpl
     private Number stageRate;
     
     private DataInputBlobReader serialStremReader; //must be held as we accumulate serial data.
-    
+    private DataInputBlobReader<ImageSchema> imageStreamReader;
     public static void initOperators() {
     	
     	//Add more supported operators to the system
@@ -86,7 +87,15 @@ public class ReactiveListenerStageIOT extends ReactiveListenerStage<HardwareImpl
 				((ReactiveListenerStageIOT)r).consumeSerialMessage((SerialListenerBase)target, input);										
 			}        		                	 
         })
-        .addOperator(AnalogListenerBase.class, 
+		.addOperator(ImageListenerBase.class,
+					 ImageSchema.instance,
+					 new ReactiveOperator() {
+			 @Override
+			 public void apply(Object target, Pipe input, ReactiveListenerStage r) {
+				 ((ReactiveListenerStageIOT) r).consumeImageMessage((ImageListenerBase) target, input);
+			 }
+		 })
+        .addOperator(AnalogListenerBase.class,
         		GroveResponseSchema.instance,
 	       		 new ReactiveOperator() {
 				@Override
@@ -315,7 +324,21 @@ public class ReactiveListenerStageIOT extends ReactiveListenerStage<HardwareImpl
 		
 	}
 
-
+	protected void consumeImageMessage(ImageListenerBase listener, Pipe<ImageSchema> inputPipe) {
+		while (PipeReader.tryReadFragment(inputPipe)) {
+			int msgIdx = PipeReader.getMsgIdx(inputPipe);
+			switch(msgIdx) {
+				case ImageSchema.MSG_CHUNKEDSTREAM_1:
+					DataInputBlobReader<ImageSchema> fieldByteArray = PipeReader.inputStream(inputPipe, ImageSchema.MSG_CHUNKEDSTREAM_1_FIELD_BYTEARRAY_2);
+					listener.onImage(fieldByteArray.readLine());
+					break;
+				case -1:
+					//requestShutdown();
+					break;
+			}
+			PipeReader.releaseReadLock(inputPipe);
+		}
+	}
     
 
     protected void consumeResponseMessage(Object listener, Pipe<GroveResponseSchema> p) {
