@@ -836,6 +836,37 @@ public abstract class HardwareImpl extends BuilderImpl implements Hardware {
 
 			}
 		}
+
+		///////////////
+		//only build image input if the data is consumed
+		///////////////
+		/*Pipe<ImageSchema>[] imageInputPipes = GraphManager.allPipesOfTypeWithNoProducer(gm2, ImageSchema.instance);//done late to ensure we capture new consumers
+		if (imageInputPipes.length > 1) {
+
+			//Pipe<ImageSchema> masterImagePipe = PipeConfig.pipe(imageInputPipes[0].config().shrink2x());
+			Pipe<ImageSchema> masterImagePipe = PipeConfig.pipe(imageInputPipes[0].config().shrink2x());
+
+			ReplicatorStage.newInstance(gm, masterImagePipe, imageInputPipes);
+			if (!isTestHardware()) {
+				new LinuxImageCaptureStage(gm, masterImagePipe, imageFrameTriggerRateMicros, imageWidth, imageHeight);
+			} else {
+				new LinuxImageCaptureStage(gm, masterImagePipe, imageFrameTriggerRateMicros, imageWidth, imageHeight, testImageSource);
+			}
+		} else if (imageInputPipes.length == 1){
+			if (!isTestHardware()) {
+				new LinuxImageCaptureStage(gm, imageInputPipes[0], imageFrameTriggerRateMicros, imageWidth, imageHeight);
+			} else {
+				new LinuxImageCaptureStage(gm, imageInputPipes[0], imageFrameTriggerRateMicros, imageWidth, imageHeight, testImageSource);
+			}
+		}*/
+
+		Pipe<ImageSchema> imagePipe = newImageSchemaPipe();
+
+		if (!isTestHardware()) {
+			new LinuxImageCaptureStage(gm, imagePipe, imageFrameTriggerRateMicros, imageWidth, imageHeight);
+		} else {
+			new LinuxImageCaptureStage(gm, imagePipe, imageFrameTriggerRateMicros, imageWidth, imageHeight, testImageSource);
+		}
 		
 		//////////////
 		//setup location detection from images
@@ -853,7 +884,7 @@ public abstract class HardwareImpl extends BuilderImpl implements Hardware {
 				throw new UnsupportedOperationException("Can not support more than 1 behavior/command channel turning on/off learning mode");
 			}
 			
-			Pipe<ImageSchema> imagePipe = newImageSchemaPipe();
+			//Pipe<ImageSchema> imagePipe = imageInputPipes[0];
 			
 			Pipe<CalibrationStatusSchema> rootCalibrationDone;
 			if (calibrationDone.length>1) {
@@ -884,29 +915,7 @@ public abstract class HardwareImpl extends BuilderImpl implements Hardware {
 														  rootProbLocation, 
 					                                      rootCalibrationDone);
 		}
-		
-		
-		///////////////
-		//only build image input if the data is consumed
-		///////////////
-		Pipe<ImageSchema>[] imageInputPipes = GraphManager.allPipesOfTypeWithNoProducer(gm2, ImageSchema.instance);//done late to ensure we capture new consumers
-		if (imageInputPipes.length > 1) {
-			
-			Pipe<ImageSchema> masterImagePipe = PipeConfig.pipe(imageInputPipes[0].config().shrink2x());
-						
-			ReplicatorStage.newInstance(gm, masterImagePipe, imageInputPipes);
-            if (!isTestHardware()) {
-                new LinuxImageCaptureStage(gm, masterImagePipe, imageFrameTriggerRateMicros, imageWidth, imageHeight);
-            } else {
-                new LinuxImageCaptureStage(gm, masterImagePipe, imageFrameTriggerRateMicros, imageWidth, imageHeight, testImageSource);
-            }
-		} else if (imageInputPipes.length == 1){
-            if (!isTestHardware()) {
-                new LinuxImageCaptureStage(gm, imageInputPipes[0], imageFrameTriggerRateMicros, imageWidth, imageHeight);
-            } else {
-                new LinuxImageCaptureStage(gm, imageInputPipes[0], imageFrameTriggerRateMicros, imageWidth, imageHeight, testImageSource);
-            }
-		}
+
 		///////////////
 		//only build direct pin output when we detected its use
 		///////////////
