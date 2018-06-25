@@ -4,7 +4,9 @@ import com.ociweb.pronghorn.image.schema.ImageSchema;
 import com.ociweb.pronghorn.pipe.Pipe;
 import com.ociweb.pronghorn.pipe.PipeReader;
 import com.ociweb.pronghorn.pipe.PipeWriter;
+import com.ociweb.pronghorn.pipe.RawDataSchema;
 import com.ociweb.pronghorn.stage.PronghornStage;
+import com.ociweb.pronghorn.stage.route.RawDataSplitterStage;
 import com.ociweb.pronghorn.stage.scheduling.GraphManager;
 
 import java.nio.ByteBuffer;
@@ -54,8 +56,14 @@ public class ImageDownscaleStage extends PronghornStage {
     public static final byte[] B_OUTPUT_ENCODING = "B8".getBytes(StandardCharsets.US_ASCII);
     public static final byte[] MONO_OUTPUT_ENCODING = "MONO8".getBytes(StandardCharsets.US_ASCII);
 
+    public static ImageDownscaleStage newInstance(GraphManager graphManager, Pipe<ImageSchema> input, Pipe<ImageSchema>[] outputs, int outputWidth, int outputHeight) {
+        return new ImageDownscaleStage(graphManager, input, outputs, outputWidth, outputHeight);
+    }
+
     public ImageDownscaleStage(GraphManager graphManager, Pipe<ImageSchema> input, Pipe<ImageSchema>[] outputs, int outputWidth, int outputHeight) {
         super(graphManager, input, outputs);
+
+        System.out.println("Started ImageDownscaleStage!");
 
         // Validate and assign pipes.
         assert outputs.length == 4 : "Image downscaling stage expects R, G, B, and Monochrome output pipes.";
@@ -71,11 +79,15 @@ public class ImageDownscaleStage extends PronghornStage {
         this.imageFrameRowBytesG = new byte[outputWidth];
         this.imageFrameRowBytesB = new byte[outputWidth];
         this.imageFrameRowBytesMono = new byte[outputWidth];
+
+        System.out.println("Left start of ImageDownscaleStage!");
     }
 
     @Override
     public void run() {
+        System.out.println("Running downscale...");
         while (PipeReader.tryReadFragment(input)) {
+            System.out.println("Reading of input pipe in downscale...");
             int msgIdx = PipeReader.getMsgIdx(input);
             switch(msgIdx) {
                 case ImageSchema.MSG_FRAMESTART_1:
