@@ -98,7 +98,8 @@ public class ImageDownscaleStage extends PronghornStage {
 
                     // Ensure source resolution is evenly divisible by target resolution.
                     assert imageFrameWidth % outputWidth == 0 &&
-                           imageFrameHeight % outputHeight == 0 : "Source resolution must be evenly divisible by target resolution.";
+                           imageFrameHeight % outputHeight == 0 : String.format("Source resolution must be evenly divisible by target resolution. " +
+                            "width=(original = %dpx, target = %dpx),%nheight=(original = %dpx, target = %dpx)", imageFrameWidth, outputWidth, imageFrameHeight, outputHeight);
 
                     // Extract and verify encoding.
                     encodingBytes.position(0);
