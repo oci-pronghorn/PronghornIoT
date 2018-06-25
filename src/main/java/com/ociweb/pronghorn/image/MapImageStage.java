@@ -23,7 +23,7 @@ import com.ociweb.pronghorn.util.primitive.LoisVisitor;
 
 public class MapImageStage extends PronghornStage {
 
-	private int[]   workspace;
+	private int[] workspace;
 	private Lois locations; 	
 	private int [] imageLookup;
 	private int imageWidth;
@@ -100,6 +100,7 @@ public class MapImageStage extends PronghornStage {
 		this.output = output;
 		this.statusOut = statusOut;
 		this.ack = ack;
+		this.workspace = null;
 		
 		GraphManager.addNota(graphManager, GraphManager.DOT_RANK_NAME, "ModuleStage", this);
 		
@@ -232,6 +233,10 @@ public class MapImageStage extends PronghornStage {
 						totalRows = Pipe.takeInt(imgInput);
 						time = Pipe.takeLong(imgInput); 
 						//clear histogram totals
+						if (null ==	workspace) {
+							//todo: do we use learningMaxSlices?
+							workspace = new int[learningMaxSlices];
+						}
 						Arrays.fill(workspace, 0);
 						activeRow = 0;
 						
