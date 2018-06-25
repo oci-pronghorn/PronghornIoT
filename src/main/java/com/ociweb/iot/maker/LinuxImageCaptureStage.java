@@ -106,6 +106,8 @@ public class LinuxImageCaptureStage extends PronghornStage {
         if (output.maxVarLen<this.rowSize) {
         	throw new UnsupportedOperationException("Input pipe must accept blocks as large as "+rowSize+" but it only takes "+output.maxVarLen);
         }
+
+        GraphManager.addNota(graphManager, GraphManager.PRODUCER, GraphManager.PRODUCER, this);
         
     }
 
