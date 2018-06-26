@@ -232,7 +232,19 @@ public class MapImageStage extends PronghornStage {
 						imageInProgress = true;
 						totalWidth = Pipe.takeInt(imgInput);
 						totalRows = Pipe.takeInt(imgInput);
-						time = Pipe.takeLong(imgInput); 
+						time = Pipe.takeLong(imgInput);
+						
+						int frameBytes = Pipe.takeInt(imgInput);
+						int bitsPerPixel =  Pipe.takeInt(imgInput);
+						ChannelReader reader = Pipe.openInputStream(imgInput);
+						
+						if (null == workspace || imageWidth!=totalWidth || imageHeight!=totalRows) {
+							int localDepth=256;
+							int maxLocatons = 1<<16;//TODO: need a way to set this
+							initProcessing(totalWidth, totalRows, localDepth, maxLocatons);
+						}
+						
+						
 						//clear histogram totals
 						if (null ==	workspace) {
 							//todo: do we use learningMaxSlices?
@@ -426,19 +438,7 @@ public class MapImageStage extends PronghornStage {
 				int depth  	  = reader.readPackedInt();
 				int locations = reader.readPackedInt();//max location value+1
 				
-				if (null == workspace || workspace.length != locations) {
-					workspace = new int[locations];
-				}
-				imageWidth = width;
-				imageHeight = height;
-				imageDepth = depth;
-				final int imageLookupLength = width*height*depth;
-				
-				//init the image matrix as needed		
-				if (null ==	imageLookup || imageLookup.length != imageLookupLength) {
-					imageLookup = new int[imageLookupLength];
-				}
-				loadPosition = 0;
+				initProcessing(width, height, depth, locations);
 			}
 
 			while ( ((reader.available() >= ChannelReader.PACKED_INT_SIZE) || isEnd) 
@@ -464,6 +464,22 @@ public class MapImageStage extends PronghornStage {
 			}
 		}
 		return false;
+	}
+
+	private void initProcessing(int width, int height, int depth, int locations) {
+		if (null == workspace || workspace.length != locations) {
+			workspace = new int[locations];
+		}
+		imageWidth = width;
+		imageHeight = height;
+		imageDepth = depth;
+		final int imageLookupLength = width*height*depth;
+		
+		//init the image matrix as needed		
+		if (null ==	imageLookup || imageLookup.length != imageLookupLength) {
+			imageLookup = new int[imageLookupLength];
+		}
+		loadPosition = 0;
 	}
 
 	private void publishHistogram() {
