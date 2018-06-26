@@ -653,23 +653,22 @@ public abstract class HardwareImpl extends BuilderImpl implements Hardware {
 	public void buildStages(MsgRuntime runtime) {
 
 		IntHashTable subscriptionPipeLookup2 = MsgRuntime.getSubPipeLookup(runtime);
-		GraphManager gm2 = MsgRuntime.getGraphManager(runtime);
-		
-		Pipe<I2CResponseSchema>[] i2cResponsePipes = GraphManager.allPipesOfTypeWithNoProducer(gm2, I2CResponseSchema.instance);
-		Pipe<GroveResponseSchema>[] responsePipes = GraphManager.allPipesOfTypeWithNoProducer(gm2, GroveResponseSchema.instance);
 
-		Pipe<SerialOutputSchema>[] serialOutputPipes = GraphManager.allPipesOfTypeWithNoConsumer(gm2, SerialOutputSchema.instance);
-		Pipe<I2CCommandSchema>[] i2cPipes = GraphManager.allPipesOfTypeWithNoConsumer(gm2, I2CCommandSchema.instance);
-		Pipe<GroveRequestSchema>[] pinRequestPipes = GraphManager.allPipesOfTypeWithNoConsumer(gm2, GroveRequestSchema.instance);
-		Pipe<SerialInputSchema>[] serialInputPipes = GraphManager.allPipesOfTypeWithNoProducer(gm2, SerialInputSchema.instance);
+		Pipe<I2CResponseSchema>[] i2cResponsePipes = GraphManager.allPipesOfTypeWithNoProducer(gm, I2CResponseSchema.instance);
+		Pipe<GroveResponseSchema>[] responsePipes = GraphManager.allPipesOfTypeWithNoProducer(gm, GroveResponseSchema.instance);
 
-		Pipe<NetResponseSchema>[] httpClientResponsePipes = GraphManager.allPipesOfTypeWithNoProducer(gm2, NetResponseSchema.instance);
-		Pipe<MessageSubscription>[] subscriptionPipes = GraphManager.allPipesOfTypeWithNoProducer(gm2, MessageSubscription.instance);
+		Pipe<SerialOutputSchema>[] serialOutputPipes = GraphManager.allPipesOfTypeWithNoConsumer(gm, SerialOutputSchema.instance);
+		Pipe<I2CCommandSchema>[] i2cPipes = GraphManager.allPipesOfTypeWithNoConsumer(gm, I2CCommandSchema.instance);
+		Pipe<GroveRequestSchema>[] pinRequestPipes = GraphManager.allPipesOfTypeWithNoConsumer(gm, GroveRequestSchema.instance);
+		Pipe<SerialInputSchema>[] serialInputPipes = GraphManager.allPipesOfTypeWithNoProducer(gm, SerialInputSchema.instance);
 
-		Pipe<TrafficOrderSchema>[] orderPipes = GraphManager.allPipesOfTypeWithNoConsumer(gm2, TrafficOrderSchema.instance);
-		Pipe<ClientHTTPRequestSchema>[] httpClientRequestPipes = GraphManager.allPipesOfTypeWithNoConsumer(gm2, ClientHTTPRequestSchema.instance);
-		Pipe<MessagePubSub>[] messagePubSub = GraphManager.allPipesOfTypeWithNoConsumer(gm2, MessagePubSub.instance);
-		Pipe<IngressMessages>[] ingressMessagePipes = GraphManager.allPipesOfTypeWithNoConsumer(gm2, IngressMessages.instance);
+		Pipe<NetResponseSchema>[] httpClientResponsePipes = GraphManager.allPipesOfTypeWithNoProducer(gm, NetResponseSchema.instance);
+		Pipe<MessageSubscription>[] subscriptionPipes = GraphManager.allPipesOfTypeWithNoProducer(gm, MessageSubscription.instance);
+
+		Pipe<TrafficOrderSchema>[] orderPipes = GraphManager.allPipesOfTypeWithNoConsumer(gm, TrafficOrderSchema.instance);
+		Pipe<ClientHTTPRequestSchema>[] httpClientRequestPipes = GraphManager.allPipesOfTypeWithNoConsumer(gm, ClientHTTPRequestSchema.instance);
+		Pipe<MessagePubSub>[] messagePubSub = GraphManager.allPipesOfTypeWithNoConsumer(gm, MessagePubSub.instance);
+		Pipe<IngressMessages>[] ingressMessagePipes = GraphManager.allPipesOfTypeWithNoConsumer(gm, IngressMessages.instance);
 
 
 		//TODO: must pull out those pubSub Pipes for direct connections
@@ -729,7 +728,7 @@ public abstract class HardwareImpl extends BuilderImpl implements Hardware {
 
 		while (--t>=0) {
 
-			int features = getFeatures(gm2, orderPipes[t]);
+			int features = getFeatures(gm, orderPipes[t]);
 
 			Pipe<TrafficReleaseSchema>[] goOut = new Pipe[eventSchemas];
 			Pipe<TrafficAckSchema>[] ackIn = new Pipe[eventSchemas];
@@ -836,38 +835,29 @@ public abstract class HardwareImpl extends BuilderImpl implements Hardware {
 
 			}
 		}
-
-		//todo: this is temporary
-		/*Pipe<ImageSchema> imagePipe = newImageSchemaPipe();
-
-		if (!isTestHardware()) {
-			new LinuxImageCaptureStage(gm, imagePipe, imageFrameTriggerRateMicros, imageWidth, imageHeight);
-		} else {
-			new LinuxImageCaptureStage(gm, imagePipe, imageFrameTriggerRateMicros, imageWidth, imageHeight, testImageSource);
-		}*/
 		
 		//////////////
 		//setup location detection from images
 		//////////////
 		//if empty then we have no behaviors listening to training results
-		Pipe<CalibrationStatusSchema>[] calibrationDone =  GraphManager.allPipesOfTypeWithNoProducer(gm2, CalibrationStatusSchema.instance);
+		Pipe<CalibrationStatusSchema>[] calibrationDone =  GraphManager.allPipesOfTypeWithNoProducer(gm, CalibrationStatusSchema.instance);
 		//if empty then we have no behaviors reading location data
-		Pipe<ProbabilitySchema>[] probLocation =  GraphManager.allPipesOfTypeWithNoProducer(gm2, ProbabilitySchema.instance);		
+		Pipe<ProbabilitySchema>[] probLocation =  GraphManager.allPipesOfTypeWithNoProducer(gm, ProbabilitySchema.instance);		
 		//if empty then we have behavior command channel controlling training on/off mode.
-		Pipe<LocationModeSchema>[] modeSelectionPipe = GraphManager.allPipesOfTypeWithNoConsumer(gm2, LocationModeSchema.instance);
+		Pipe<LocationModeSchema>[] modeSelectionPipe = GraphManager.allPipesOfTypeWithNoConsumer(gm, LocationModeSchema.instance);
 		////////
 		if (calibrationDone.length>0 || probLocation.length>0 || modeSelectionPipe.length>0) {
 			
 			if (modeSelectionPipe.length>1) {
 				throw new UnsupportedOperationException("Can not support more than 1 behavior/command channel turning on/off learning mode");
 			}
-
+			
 			Pipe<ImageSchema> imagePipe = newImageSchemaPipe();
 			
 			Pipe<CalibrationStatusSchema> rootCalibrationDone;
 			if (calibrationDone.length>1) {
 				rootCalibrationDone = PipeConfig.pipe(calibrationDone[0].config().shrink2x());
-				ReplicatorStage.newInstance(gm2, rootCalibrationDone, calibrationDone);
+				ReplicatorStage.newInstance(gm, rootCalibrationDone, calibrationDone);
 			} else {
 				if (calibrationDone.length==1) {				
 					rootCalibrationDone = calibrationDone[0];
@@ -879,7 +869,7 @@ public abstract class HardwareImpl extends BuilderImpl implements Hardware {
 			Pipe<ProbabilitySchema> rootProbLocation;
 			if (probLocation.length>1) {
 				rootProbLocation = PipeConfig.pipe(probLocation[0].config().shrink2x());
-				ReplicatorStage.newInstance(gm2, rootProbLocation, probLocation);
+				ReplicatorStage.newInstance(gm, rootProbLocation, probLocation);
 			} else {
 				if (probLocation.length==1) {				
 					rootProbLocation = probLocation[0];
@@ -887,38 +877,35 @@ public abstract class HardwareImpl extends BuilderImpl implements Hardware {
 					rootProbLocation = null;
 				}
 			}
-
-			ImageGraphBuilder.buildLocationDetectionGraph(gm2, loadLocationDataFilePath, saveLocationDataFilePath, imagePipe,
+			
+			ImageGraphBuilder.buildLocationDetectionGraph(gm, loadLocationDataFilePath, saveLocationDataFilePath, imagePipe,
 														  modeSelectionPipe.length==0 ? null :modeSelectionPipe[0], 
 														  rootProbLocation, 
 					                                      rootCalibrationDone);
 		}
-
+		
+		
 		///////////////
 		//only build image input if the data is consumed
 		///////////////
-
-
-		Pipe<ImageSchema>[] imageInputPipes = GraphManager.allPipesOfTypeWithNoProducer(gm2, ImageSchema.instance); //done late to ensure we capture new consumers
+		Pipe<ImageSchema>[] imageInputPipes = GraphManager.allPipesOfTypeWithNoProducer(gm, ImageSchema.instance);//done late to ensure we capture new consumers
 		if (imageInputPipes.length > 1) {
-			System.out.println("multiple image input pipes!");
+			
 			Pipe<ImageSchema> masterImagePipe = PipeConfig.pipe(imageInputPipes[0].config().shrink2x());
-			ReplicatorStage.newInstance(gm2, masterImagePipe, imageInputPipes);
-			if (!isTestHardware()) {
-				new LinuxImageCaptureStage(gm2, masterImagePipe, imageFrameTriggerRateMicros, imageWidth, imageHeight);
-			} else {
-				new LinuxImageCaptureStage(gm2, masterImagePipe, imageFrameTriggerRateMicros, imageWidth, imageHeight, testImageSource);
-			}
+						
+			ReplicatorStage.newInstance(gm, masterImagePipe, imageInputPipes);
+            if (!isTestHardware()) {
+                new LinuxImageCaptureStage(gm, masterImagePipe, imageFrameTriggerRateMicros, imageWidth, imageHeight);
+            } else {
+                new LinuxImageCaptureStage(gm, masterImagePipe, imageFrameTriggerRateMicros, imageWidth, imageHeight, testImageSource);
+            }
 		} else if (imageInputPipes.length == 1){
-			System.out.println("only one image input pipe!");
-			if (!isTestHardware()) {
-				System.out.println("not using test hardware for imaging siz of inputs:  + im");
-				new LinuxImageCaptureStage(gm2, imageInputPipes[0], imageFrameTriggerRateMicros, imageWidth, imageHeight);
-			} else {
-				new LinuxImageCaptureStage(gm2, imageInputPipes[0], imageFrameTriggerRateMicros, imageWidth, imageHeight, testImageSource);
-			}
+            if (!isTestHardware()) {
+                new LinuxImageCaptureStage(gm, imageInputPipes[0], imageFrameTriggerRateMicros, imageWidth, imageHeight);
+            } else {
+                new LinuxImageCaptureStage(gm, imageInputPipes[0], imageFrameTriggerRateMicros, imageWidth, imageHeight, testImageSource);
+            }
 		}
-
 		///////////////
 		//only build direct pin output when we detected its use
 		///////////////
