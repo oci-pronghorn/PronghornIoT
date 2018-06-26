@@ -23,7 +23,7 @@ import com.ociweb.pronghorn.util.primitive.LoisVisitor;
 
 public class MapImageStage extends PronghornStage {
 
-	private int[]   workspace;
+	private int[] workspace;
 	private Lois locations; 	
 	private int [] imageLookup;
 	private int imageWidth;
@@ -100,7 +100,9 @@ public class MapImageStage extends PronghornStage {
 		this.output = output;
 		this.statusOut = statusOut;
 		this.ack = ack;
-		
+		this.workspace = null;
+		this.imageLookup = null;
+
 		GraphManager.addNota(graphManager, GraphManager.DOT_RANK_NAME, "ModuleStage", this);
 		
 	}
@@ -244,6 +246,10 @@ public class MapImageStage extends PronghornStage {
 						
 						
 						//clear histogram totals
+						if (null ==	workspace) {
+							//todo: do we use learningMaxSlices?
+							workspace = new int[learningMaxSlices];
+						}
 						Arrays.fill(workspace, 0);
 						activeRow = 0;
 						
@@ -385,6 +391,12 @@ public class MapImageStage extends PronghornStage {
 		
 				savePosition = 0;
 			}
+
+			final int imageLookupLength = imageWidth*imageHeight*imageDepth;
+			if (null ==	imageLookup || imageLookup.length != imageLookupLength) {
+				imageLookup = new int[imageLookupLength];
+			}
+
 			while (savePosition<imageLookup.length && writer.remaining()>=ChannelReader.PACKED_INT_SIZE) {
 				writer.writePackedInt(imageLookup[savePosition++]);				
 			}			
@@ -438,7 +450,13 @@ public class MapImageStage extends PronghornStage {
 			
 			if (loadPosition == imageLookup.length) {
 				loadPosition = -2;
-				boolean result = locations.load(pipe); //if in this state keep calling.
+
+				boolean result = false;
+
+				if(locations != null){
+					result = locations.load(pipe); //if in this state keep calling.
+				}
+
 				if (result) {
 					loadPosition = -1;//done					
 				}

@@ -65,12 +65,12 @@ public class LinuxImageCaptureStage extends PronghornStage {
      *
      * @param graphManager Graph manager this stage is a part of.
      * @param output Output pipe which images are published to.
-     * @param triggerRateMilliseconds Interval in milliseconds that this stage will run.
+     * @param triggerRateMicroseconds Interval in microseconds that this stage will run.
      * @param width Width of images captures from the camera.
      * @param height Height of images captured from the camera.
      */
-    public LinuxImageCaptureStage(GraphManager graphManager, Pipe<ImageSchema> output, int triggerRateMilliseconds, int width, int height) {
-        this(graphManager, output, triggerRateMilliseconds, width, height, null);
+    public LinuxImageCaptureStage(GraphManager graphManager, Pipe<ImageSchema> output, int triggerRateMicroseconds, int width, int height) {
+        this(graphManager, output, triggerRateMicroseconds, width, height, null);
     }
 
     /**
@@ -106,6 +106,8 @@ public class LinuxImageCaptureStage extends PronghornStage {
         if (output.maxVarLen<this.rowSize) {
         	throw new UnsupportedOperationException("Input pipe must accept blocks as large as "+rowSize+" but it only takes "+output.maxVarLen);
         }
+
+        GraphManager.addNota(graphManager, GraphManager.PRODUCER, GraphManager.PRODUCER, this);
         
     }
 
