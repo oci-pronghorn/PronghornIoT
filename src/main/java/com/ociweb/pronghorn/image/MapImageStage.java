@@ -107,7 +107,10 @@ public class MapImageStage extends PronghornStage {
 		
 	}
 
-	
+	@Override
+	public void startup() {
+		locations = new Lois();
+	}
 	
 	@Override
 	public void run() {
