@@ -877,6 +877,12 @@ public abstract class HardwareImpl extends BuilderImpl implements Hardware {
 					rootProbLocation = null;
 				}
 			}
+
+			if (!isTestHardware()) {
+				new LinuxImageCaptureStage(gm, imagePipe, imageFrameTriggerRateMicros, imageWidth, imageHeight);
+			} else {
+				new LinuxImageCaptureStage(gm, imagePipe, imageFrameTriggerRateMicros, imageWidth, imageHeight, testImageSource);
+			}
 			
 			ImageGraphBuilder.buildLocationDetectionGraph(gm, loadLocationDataFilePath, saveLocationDataFilePath, imagePipe,
 														  modeSelectionPipe.length==0 ? null :modeSelectionPipe[0], 
@@ -888,6 +894,7 @@ public abstract class HardwareImpl extends BuilderImpl implements Hardware {
 		///////////////
 		//only build image input if the data is consumed
 		///////////////
+		/*
 		Pipe<ImageSchema>[] imageInputPipes = GraphManager.allPipesOfTypeWithNoProducer(gm, ImageSchema.instance);//done late to ensure we capture new consumers
 		if (imageInputPipes.length > 1) {
 			
@@ -905,7 +912,7 @@ public abstract class HardwareImpl extends BuilderImpl implements Hardware {
             } else {
                 new LinuxImageCaptureStage(gm, imageInputPipes[0], imageFrameTriggerRateMicros, imageWidth, imageHeight, testImageSource);
             }
-		}
+		}*/
 		///////////////
 		//only build direct pin output when we detected its use
 		///////////////
